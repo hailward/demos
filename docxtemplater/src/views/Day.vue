@@ -12,10 +12,43 @@ export default {
   name: "home",
   data() {
     return {
-      
+      base64: null
     };
   },
   methods: {
+    getBase64() {
+      let _this = this;
+      let img = new Image();
+      img.src = require("../assets/logo.png");
+      img.onload = function() {
+        let canvas = document.createElement("canvas");
+        canvas.width = this.width;
+        canvas.height = this.height;
+        canvas.getContext('2d').drawImage(this, 0, 0);
+        _this.base64 = canvas.toDataURL();
+        console.log(_this.base64)
+      };
+    },
+    base64DataURLToArrayBuffer(dataURL) {
+      const base64Regex = /^data:image\/(png|jpg|svg|svg\+xml);base64,/;
+      if (!base64Regex.test(dataURL)) {
+        return false;
+      }
+      const stringBase64 = dataURL.replace(base64Regex, "");
+      let binaryString;
+      if (typeof window !== "undefined") {
+        binaryString = window.atob(stringBase64);
+      } else {
+        binaryString = new Buffer(stringBase64, "base64").toString("binary");
+      }
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        const ascii = binaryString.charCodeAt(i);
+        bytes[i] = ascii;
+      }
+      return bytes.buffer;
+    },
     // 点击导出word
     exportWord: function() {
       let _this = this;
@@ -26,28 +59,40 @@ export default {
         if (error) {
           throw error;
         }
-        
+
         // 创建一个JSZip实例，内容为模板的内容
         let zip = new JSZip(content);
         // 创建并加载docxtemplater实例对象
         let doc = new window.docxtemplater().loadZip(zip);
         // 设置模板变量的值
         let date = new Date();
+        let imageModule = new ImageModule({
+          centered: true,
+          fileType: 'docx',
+          getImage: function(dataURL) {
+            return _this.base64DataURLToArrayBuffer(dataURL);
+          },
+          getSize: function() {
+            return [200, 200];
+          }
+        });
+        doc.attachModule(imageModule);
         doc.setData({
-          phase: '1',
+          phase: "1",
           date: {
             year: date.getFullYear(),
-            month: date.getMonth()+1,
-            day: date.getDate(),
+            month: date.getMonth() + 1,
+            day: date.getDate()
           },
           now: {
             year: date.getFullYear(),
-            month: date.getMonth()+1,
+            month: date.getMonth() + 1,
             day: date.getDate(),
-            hour: date.getHours(),
+            hour: date.getHours()
           },
+          image: _this.base64
         });
-        
+
         try {
           // 用模板变量的值替换所有模板变量
           doc.render();
@@ -62,7 +107,7 @@ export default {
           console.log(JSON.stringify({ error: e }));
           throw error;
         }
-        
+
         // 生成一个代表docxtemplater对象的zip文件（不是一个真实的文件，而是在内存中的表示）
         let out = doc.getZip().generate({
           type: "blob",
@@ -73,17 +118,20 @@ export default {
         saveAs(out, "报价单.docx");
       });
     }
+  },
+  mounted() {
+    this.getBase64();
   }
 };
 </script>
 <style lang="scss">
 * {
-	margin: 0;
-	padding: 0;
-	font-size: 12px;
-	font-family: "微软雅黑", "宋体";
-	list-style: none;
-	box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  font-family: "微软雅黑", "宋体";
+  list-style: none;
+  box-sizing: border-box;
 }
 // 清除浮动
 .clearfix:after {
