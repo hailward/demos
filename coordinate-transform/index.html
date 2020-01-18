@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>坐标转换工具</title>
+    <link href="lib/element/index.css" rel="stylesheet">
+    <link href="index.css" rel="stylesheet">
+    <script src="lib/sheetjs/xlsx.full.min.js"></script>
+    <script src="lib/fc-projtool.min.js"></script>
+    <script src="lib/vue.min.js"></script>
+    <script src="lib/element/index.js"></script>
+</head>
+
+<body>
+    <div id="app" v-loading="loading" :element-loading-text="loadingText">
+        <div class="main">
+            <el-upload
+                class="uploader" 
+                ref="uploader" 
+                :limit="1" 
+                :auto-upload="false" 
+                :on-exceed="handleFileExceed" 
+                :on-change="handleFileChange" 
+                :on-remove="handleFileRemove"
+                :file-list="fileList" 
+                accept=".xls,.xlsx">
+                <div class="upload-trigger">
+                    <div>
+                        <i class="el-icon-plus"></i><br>
+                        <span>点击上传文件</span>
+                    </div>
+                </div>
+            </el-upload>
+            <div class="input-row">
+                <span class="label" style="width: 6em;text-align-last: justify;">源坐标系：</span>
+                <el-select size="small" v-model="config.source" style="flex: 1;">
+                    <el-option v-for="(item,index) in coordinates" :key="index" :label="item" :value="item">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="input-row">
+                <span class="label" style="width: 6em;text-align-last: justify;">目标坐标系：</span>
+                <el-select size="small" v-model="config.target" style="flex: 1;">
+                    <el-option v-for="(item,index) in coordinates" :key="index" :label="item" :value="item">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="input-row" style="justify-content: space-around;">
+                <el-button size="small" type="primary">
+                    <a href="template.xlsx" download style="color: inherit;text-decoration: none;">模板</a>
+                </el-button>
+                <el-button size="small" type="primary">
+                    <a href="README.md" download style="color: inherit;text-decoration: none;">文档</a>
+                </el-button>
+                <el-button size="small" type="primary" :disabled="!fileList.length" @click="showDialog">配置</el-button>
+                <el-button size="small" type="primary" :disabled="!fileList.length" @click="exportFile">导出</el-button>
+            </div>
+        </div>
+        <el-dialog :visible.sync="dialogVisible" :title="dialogTitle[step]">
+            <div v-if="step==0">
+                <div class="input-row">
+                    <span class="label">File：</span>
+                    <div class="nowrap" :title="filename">{{filename}}</div>
+                </div>
+                <div class="input-row">
+                    <span class="label">Sheet：</span>
+                    <el-select size="small" v-model="options.sheetName" @change="sheetNameChange">
+                        <el-option v-for="(item,index) in sheetNames" :key="index" :label="item" :value="item"></el-option>
+                    </el-select>
+                </div>
+            </div>
+            <div v-if="step==1">
+                <div class="input-row">
+                    <span class="label">Sheet：</span>
+                    <div class="nowrap" :title="options.sheetName">{{options.sheetName}}</div>
+                </div>
+                <div class="input-row">
+                    <span class="label">Longitude：</span>
+                    <el-select size="small" v-model="options.lngKey">
+                        <el-option v-for="(item,index) in sheetHeaders" :key="index" :label="item.value" :value="item.key">
+                        </el-option>
+                    </el-select>
+                </div>
+                <div class="input-row">
+                    <span class="label">Latitude：</span>
+                    <el-select size="small" v-model="options.latKey">
+                        <el-option v-for="(item,index) in sheetHeaders" :key="index" :label="item.value" :value="item.key">
+                        </el-option>
+                    </el-select>
+                </div>
+            </div>
+            <template slot="footer">
+                <template v-if="step==0">
+                    <el-button size="small" type="primary" :disabled="!options.sheetName" @click="next(step)">下一步
+                    </el-button>
+                </template>
+                <template v-if="step==1">
+                    <el-button size="small" type="warning" @click="prev(step)">上一步</el-button>
+                    <el-button size="small" type="primary" :disabled="!options.lngKey || !options.latKey"
+                        @click="finish">确认</el-button>
+                </template>
+            </template>
+        </el-dialog>
+    </div>
+    <script src="index.js"></script>
+</body>
+
+</html>
