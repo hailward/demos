@@ -10,4 +10,4 @@ function toSum(nums, target) {
 }
 
 // 测试用例
-// console.log([2, 7, 11, 15], 9)
+console.log([2, 7, 11, 15], 9)
