@@ -1,0 +1,1 @@
+cmd /c "E: && cd E:\Git\demos\switch-desktops && pm2 start index.js"
