@@ -1,1 +1,4 @@
-pm2 start E:\Git\demos\switch-desktops\index.js
+if "%1"=="hide" goto CmdBegin
+start mshta vbscript:createobject("wscript.shell").run("""%~0"" hide",0)(window.close)&&exit
+:CmdBegin
+pm2 start index.js
