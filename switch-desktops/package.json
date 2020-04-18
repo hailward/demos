@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "iohook": "^0.6.5",
-    "robotjs-node10": "^0.5.4"
+    "robotjs-node10": "^0.5.4",
+    "windows-shortcuts": "^0.1.6"
   }
 }
