@@ -1,0 +1,20 @@
+{
+  "name": "svrx-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node svrx/server.js",
+    "start": "npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@svrx/svrx": "^1.1.4"
+  },
+  "dependencies": {
+    "koa-bodyparser": "^4.2.1",
+    "mockjs": "^1.1.0"
+  }
+}
